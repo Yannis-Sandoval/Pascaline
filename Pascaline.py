@@ -1,1 +1,1 @@
-Salut
+print("test")
