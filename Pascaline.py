@@ -23,7 +23,7 @@ def testvalidinput(Character):
 def testvalidcalculation(Character,NextCharacter):
     if Character == "/":
         if NextCharacter == "0":
-            errormessage("Calculation")
+            errormessage("Cal")
             return False
     else:
         return True
