@@ -1,26 +1,29 @@
-Symbols = ["+","-","*","/","(",")"]
+Symbols = ["+","-","*","/"]
 
+# Annonce le type d'erreur de la part de l'utilisateur
+def errormessage(cause):
+    if cause == 
 
 #Vérifie si le caractère est valide entre chiffres, symboles et parenthèses
 def testvalidinput(Character):
     Validinput = False
     if Character in Symbols:
         Validinput = "Symbol"
+    if Character == "(":
+        Validinput = "OpenParenthesis"
+    if Character == ")":
+        Validinput = "CloseParenthesis"
+    elif isinstance(Character,int):
+        Validinput = "Integer"
     else:
-        try:
-            Character = int(Character)
-            Validinput = "Integer"
-        except:
-            print("Erreur")
-            print("Veuillez entrer des caractères valides")
+        errormessage("Char")
     return Validinput
 
 # Vérifie si les calculs sont authorités
 def testvalidcalculation(Character,NextCharacter):
     if Character == "/":
         if NextCharacter == "0":
-            print("Erreur")
-            print("Chiffre non valide")
+            errormessage("Calculation")
             return False
     else:
         return True
@@ -33,19 +36,35 @@ def testinputtype(Calculation):
     Symblist = ""
     for i in range(len(Calculation)):
         Inputtype = testvalidinput(Calculation[i])
-        if Inputtype == "Integer":
-            Currentnumber = Currentnumber + Inputtype
+        if testvalidcalculation(Calculation[i],Calculation[i+1]) or Inputtype == False:
+            Inputtype = False
+            break
+        elif Inputtype == "Integer":
+            Currentnumber = Currentnumber + int(Inputtype)
         elif Inputtype == "Symbol":
             Symblist = Symblist + [Inputtype]
             if testvalidinput(Calculation[i-1]) == "Integer":
                 Intlist = Intlist + [int(Currentnumber)]
                 Currentnumber = ""
+        elif Inputtype == "OpenParenthesis":
+            Intlist = Intlist + [calculator(Calculation[i+1:])]
+        elif Inputtype == "CloseParenthesis":
+            break
+    if Inputtype == False:
+        return False
 
 
 #Vérifie la priorité actuelle
-def testpriority():
-
-
+def testpriority(Symblist):
+    AddSub = ""
+    TimeDiv = ""
+    for i in range(Symblist):
+        if Symblist[i] == "+" or "-":
+            AddSub += i
+        elif Symblist[i] == "*" or "/":
+            TimeDiv += i
+    Order = TimeDiv + AddSub
+    return Order
 
 #Effectue le calcul à la plus haute priorité
 def currentcalculation(Value1,Symbols,Value2):
@@ -63,7 +82,9 @@ def currentcalculation(Value1,Symbols,Value2):
 
 #Branche principale de la calculette
 def calculator(calcule):
-    
+    result = testinputtype(calcule)
+    if result == False:
+        return ""
     
 
 calculator(input("Entrer le calcul"))
