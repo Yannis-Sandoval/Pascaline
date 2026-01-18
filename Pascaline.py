@@ -1,4 +1,10 @@
 Symbols = ["+","-","*","/","%","²","√"]
+Historique=[]
+try:
+    with open("historique.txt", "r", encoding="utf-8") as f:
+        Historique = f.read().splitlines()
+except FileNotFoundError:
+    pass
 
 #Effectue les calculs individuellement
 def currentadd(Value1,Value2):
@@ -174,7 +180,16 @@ def calculator(Calculation):
        return result
 
 #Appelle la calculatrice pour ne rendre que le résultat
-def callcalculator(Calculation):
+def callcalculator(Calculation): 
+    
+    result = sortinginput(Calculation)[0] 
+
     print(Calculation,'=',sortinginput(Calculation)[0])
+    
+    Historique.append(f"{Calculation} = {result}")
+
+    with open("historique.txt", "a", encoding="utf-8") as f:
+        f.write(f"{Calculation} = {result}\n")
 
 callcalculator("(13+3²)*432%(351-√4)")
+print(Historique)
