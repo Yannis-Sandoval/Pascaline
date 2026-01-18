@@ -1,4 +1,79 @@
-Symbols = ["+","-","*","/"]
+Symbols = ["+","-","*","/","%","²","√"]
+
+#Effectue les calculs individuellement
+def currentadd(Value1,Value2):
+    return Value1 + Value2
+def currentsub(Value1,Value2):
+    return Value1 - Value2
+def currenttime(Value1,Value2):
+    return Value1 * Value2
+def currentsquare(Value):
+    return Value * Value
+def currentdiv(Value1,Value2):
+    return Value1 / Value2
+def currentwholediv(Value1,Value2):
+    return Value1 // Value2
+def currentremainder(Value1,Value2):
+    return Value1 % Value2
+def currentsquareroot(Value):
+    return int(Value ** 0.5)
+
+#Effectue les calculs dans l'ordre
+def prioritycalculation(list,symb):
+    print(list,symb)
+    i = 0
+    print(i)
+    while not i == len(symb):
+        if symb[i] == "²":
+            list[i] = currentsquare(list[i])
+            symb.pop(i)
+        elif symb[i] == "√":
+            list[i] = currentsquareroot(list[i])
+            symb.pop(i)
+        else:
+            i += 1
+        print(list,symb)
+        print(i)
+    i = 0
+    while not i == len(symb):
+        if symb[i] == "*":
+            list[i] = currenttime(list[i],list[i+1])
+            list.pop(i+1)
+            symb.pop(i)
+        elif symb[i] == "/":
+            if symb[i+1] == "/":
+                list[i] = currentwholediv(list[i],list[i+1])
+                list.pop(i+1)
+                symb.pop(i)
+                symb.pop(i)
+            else:
+                list[i] = currentdiv(list[i],list[i+1])
+                list.pop(i+1)
+                symb.pop(i)
+        elif symb[i] == "%":
+            list[i] = currentremainder(list[i],list[i+1])
+            list.pop(i+1)
+            symb.pop(i)
+        else:
+            i += 1
+        print(list,symb)
+        print(i)
+    i = 0
+    while not i == len(symb):
+        print(i)
+        if symb[i] == "+":
+            list[i] = currentadd(list[i],list[i+1])
+            list.pop(i+1)
+            symb.pop(i)
+        elif symb[i] == "-":
+            list[i] = currentsub(list[i],list[i+1])
+            list.pop(i+1)
+            symb.pop(i)
+        else:
+            i += 1
+        print(list,symb)
+        print(i)
+    return list[0]
 
 # Annonce le type d'erreur de la part de l'utilisateur
 def errormessage(cause):
@@ -9,15 +84,15 @@ def errormessage(cause):
 
 
 #Vérifie si le caractère est valide entre chiffres, symboles et parenthèses
-def testvalidinput(Character):
+def testinputtype(Character):
     Validinput = False
     if Character in Symbols:
         Validinput = "Symbol"
-    if Character == "(":
+    elif Character == "(":
         Validinput = "OpenParenthesis"
-    if Character == ")":
+    elif Character == ")":
         Validinput = "CloseParenthesis"
-    elif isinstance(Character,int):
+    elif Character.isdigit():
         Validinput = "Integer"
     else:
         errormessage("Char")
@@ -34,31 +109,35 @@ def testvalidcalculation(Character,NextCharacter):
 
 
 #Vérifie le type de caractère entre chiffres, symboles et parenthèses
-def testinputtype(Calculation):
+def sortinginput(Calculation):
+    Calculation += ")"
     Currentnumber = "0"
     Intlist = []
     Symblist = []
-    for i in range(len(Calculation)):
-        Inputtype = testvalidinput(Calculation[i])
-        if testvalidcalculation(Calculation[i],Calculation[i+1]) or Inputtype == False:
+    i = 0
+    while not i == len(Calculation)-1:
+        Inputtype = testinputtype(Calculation[i])
+        if Inputtype == False or testvalidcalculation(Calculation[i],Calculation[i+1]) == False:
             Inputtype = False
             break
         elif Inputtype == "Integer":
-            Currentnumber = Currentnumber + Inputtype
-        elif Inputtype == "Symbol":
-            Symblist = Symblist + [Inputtype]
-            if testvalidinput(Calculation[i-1]) == "Integer":
+            Currentnumber = Currentnumber + Calculation[i]
+            if not testinputtype(Calculation[i+1]) == "Integer":
                 Intlist = Intlist + [int(Currentnumber)]
                 Currentnumber = ""
+        elif Inputtype == "Symbol":
+            Symblist = Symblist + [Calculation[i]]
         elif Inputtype == "OpenParenthesis":
-            Intlist = Intlist + [calculator(Calculation[i+1:])]
-        elif Inputtype == "CloseParenthesis":
-
+            parentcal = calculator(Calculation[i+1:])
+            Intlist = Intlist + [parentcal[0]]
+            i += parentcal[1]
+        i += 1
+        if Inputtype == "CloseParenthesis":
             break
     if Inputtype == False:
         return False
     else:
-        return [Intlist,Symblist]
+        return [prioritycalculation(Intlist,Symblist),i]
 
 
 #Vérifie la priorité actuelle
@@ -87,10 +166,15 @@ def currentcalculation(Value1,Symbols,Value2):
 
 
 #Branche principale de la calculette
-def calculator(calcule):
-    result = testinputtype(calcule)
+def calculator(Calculation):
+    result = sortinginput(Calculation)
     if result == False:
         return ""
-    
+    else:
+       return result
 
-print(testpriority("+-/+*/--+/-"))
+#Appelle la calculatrice pour ne rendre que le résultat
+def callcalculator(Calculation):
+    print(Calculation,'=',sortinginput(Calculation)[0])
+
+callcalculator("(13+3²)*432%(351-√4)")
