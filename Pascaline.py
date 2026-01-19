@@ -205,9 +205,4 @@ def calculatormenu():
         historymenu()
         
 
-    
-
-
-
 calculatormenu()
->>>>>>> Test
