@@ -1,12 +1,21 @@
-Symbols = ["+","-","*","/","%","²","√"]
-Historique=[]
+Symbols = ["+","-","*","/","//","%","²","√"]
+History=[]
 try:
     with open("historique.txt", "r", encoding="utf-8") as f:
-        Historique = f.read().splitlines()
+        History = f.read().splitlines()
 except FileNotFoundError:
     pass
 
-#Effectue les calculs individuellement
+
+# Delete History
+def clearhistory():
+    History.clear()
+    with open("historique.txt", "w", encoding="utf-8"):
+        pass
+    print("History deleted")
+
+
+# All supported calculations
 def currentadd(Value1,Value2):
     return Value1 + Value2
 def currentsub(Value1,Value2):
@@ -24,72 +33,65 @@ def currentremainder(Value1,Value2):
 def currentsquareroot(Value):
     return int(Value ** 0.5)
 
-#Effectue les calculs dans l'ordre
-def prioritycalculation(list,symb):
-    print(list,symb)
+# Call calculations in priority order
+def prioritycalculation(Intlist,Symblist):
     i = 0
-    print(i)
-    while not i == len(symb):
-        if symb[i] == "²":
-            list[i] = currentsquare(list[i])
-            symb.pop(i)
-        elif symb[i] == "√":
-            list[i] = currentsquareroot(list[i])
-            symb.pop(i)
+    while not i == len(Symblist):
+        if Symblist[i] == "²":
+            Intlist[i] = currentsquare(Intlist[i])
+            Symblist.pop(i)
+        elif Symblist[i] == "√":
+            Intlist[i] = currentsquareroot(Intlist[i])
+            Symblist.pop(i)
         else:
             i += 1
-        print(list,symb)
-        print(i)
     i = 0
-    while not i == len(symb):
-        if symb[i] == "*":
-            list[i] = currenttime(list[i],list[i+1])
-            list.pop(i+1)
-            symb.pop(i)
-        elif symb[i] == "/":
-            if symb[i+1] == "/":
-                list[i] = currentwholediv(list[i],list[i+1])
-                list.pop(i+1)
-                symb.pop(i)
-                symb.pop(i)
-            else:
-                list[i] = currentdiv(list[i],list[i+1])
-                list.pop(i+1)
-                symb.pop(i)
-        elif symb[i] == "%":
-            list[i] = currentremainder(list[i],list[i+1])
-            list.pop(i+1)
-            symb.pop(i)
+
+    while not i == len(Symblist):
+        if Symblist[i] == "*":
+            Intlist[i] = currenttime(Intlist[i],Intlist[i+1])
+            Intlist.pop(i+1)
+            Symblist.pop(i)
+        elif Symblist[i] == "/":
+            Intlist[i] = currentdiv(Intlist[i],Intlist[i+1])
+            Intlist.pop(i+1)
+            Symblist.pop(i)
+        elif Symblist[i] == "//":
+            Intlist[i] = currentwholediv(Intlist[i],Intlist[i+1])
+            Intlist.pop(i+1)
+            Symblist.pop(i)
+        elif Symblist[i] == "%":
+            Intlist[i] = currentremainder(Intlist[i],Intlist[i+1])
+            Intlist.pop(i+1)
+            Symblist.pop(i)
         else:
             i += 1
-        print(list,symb)
-        print(i)
     i = 0
-    while not i == len(symb):
-        print(i)
-        if symb[i] == "+":
-            list[i] = currentadd(list[i],list[i+1])
-            list.pop(i+1)
-            symb.pop(i)
-        elif symb[i] == "-":
-            list[i] = currentsub(list[i],list[i+1])
-            list.pop(i+1)
-            symb.pop(i)
+
+    while not i == len(Symblist):
+        if Symblist[i] == "+":
+            Intlist[i] = currentadd(Intlist[i],Intlist[i+1])
+            Intlist.pop(i+1)
+            Symblist.pop(i)
+        elif Symblist[i] == "-":
+            Intlist[i] = currentsub(Intlist[i],Intlist[i+1])
+            Intlist.pop(i+1)
+            Symblist.pop(i)
         else:
             i += 1
-        print(list,symb)
-        print(i)
-    return list[0]
-
-# Annonce le type d'erreur de la part de l'utilisateur
-def errormessage(cause):
-    if cause == "Char":
-        print("Mettre une valeur valide")
-    elif cause == "Cal":
-        print("Mettre un calcule valide")
+    return Intlist[0]
 
 
-#Vérifie si le caractère est valide entre chiffres, symboles et parenthèses
+# Declare error and type
+def errormessage(Cause):
+    print("Error")
+    if Cause == "Char":
+        print("Put a valid value")
+    elif Cause == "Cal":
+        print("Put a valid calculation")
+
+
+# Check the nature of each character
 def testinputtype(Character):
     Validinput = False
     if Character in Symbols:
@@ -104,7 +106,8 @@ def testinputtype(Character):
         errormessage("Char")
     return Validinput
 
-# Vérifie si les calculs sont authorités
+
+# Check for forbidden calculations
 def testvalidcalculation(Character,NextCharacter):
     if Character == "/":
         if NextCharacter == "0":
@@ -114,25 +117,31 @@ def testvalidcalculation(Character,NextCharacter):
         return True
 
 
-#Vérifie le type de caractère entre chiffres, symboles et parenthèses
+# Sort all characters into lists and layer of calculations
 def sortinginput(Calculation):
     Calculation += ")"
-    Currentnumber = "0"
+    CurrentInput = "0"
     Intlist = []
     Symblist = []
     i = 0
+
     while not i == len(Calculation)-1:
         Inputtype = testinputtype(Calculation[i])
-        if Inputtype == False or testvalidcalculation(Calculation[i],Calculation[i+1]) == False:
+        if Inputtype == False:
+            break
+        elif testvalidcalculation(Calculation[i],Calculation[i+1]) == False:
             Inputtype = False
             break
         elif Inputtype == "Integer":
-            Currentnumber = Currentnumber + Calculation[i]
+            CurrentInput = CurrentInput + Calculation[i]
             if not testinputtype(Calculation[i+1]) == "Integer":
-                Intlist = Intlist + [int(Currentnumber)]
-                Currentnumber = ""
+                Intlist = Intlist + [int(CurrentInput)]
+                CurrentInput = ""
         elif Inputtype == "Symbol":
-            Symblist = Symblist + [Calculation[i]]
+            CurrentInput = CurrentInput + Calculation[i]
+            if not testinputtype(Calculation[i+1]) == "Symbol":
+                Symblist = Symblist + [Calculation[i]]
+                CurrentInput = ""
         elif Inputtype == "OpenParenthesis":
             parentcal = calculator(Calculation[i+1:])
             Intlist = Intlist + [parentcal[0]]
@@ -140,56 +149,63 @@ def sortinginput(Calculation):
         i += 1
         if Inputtype == "CloseParenthesis":
             break
+
     if Inputtype == False:
         return False
     else:
-        return [prioritycalculation(Intlist,Symblist),i]
+        return [Intlist,Symblist,i]
 
 
-#Vérifie la priorité actuelle
-def testpriority(Symblist):
-    AddSub = []
-    TimeDiv = []
-    for i in range(len(Symblist)):
-        if Symblist[i] == "+" or Symblist[i] == "-":
-            AddSub += [i]
-        elif Symblist[i] == "*" or Symblist[i] == "/":
-            TimeDiv += [i]
-    Order = TimeDiv + AddSub
-    return Order
-
-#Effectue le calcul à la plus haute priorité
-def currentcalculation(Value1,Symbols,Value2):
-    if Symbols == "+":
-        Result = Value1 + Value2
-    elif Symbols == "-":
-        Result = Value1 - Value2
-    elif Symbols == "*":
-        Result = Value1 * Value2
-    elif Symbols == "/":
-        Result = Value1 / Value2
-    return Result
-
-
-#Branche principale de la calculette
+# Main calculator branch
 def calculator(Calculation):
-    result = sortinginput(Calculation)
-    if result == False:
-        return ""
+    Calculationdata = sortinginput(Calculation)
+    if Calculationdata == False:
+        return False
     else:
-       return result
+        Result = [prioritycalculation(Calculationdata[0],Calculationdata[1]),Calculationdata[2]]
+        return Result
 
-#Appelle la calculatrice pour ne rendre que le résultat
-def callcalculator(Calculation): 
+
+# History Menu
+def historymenu():
+    print(History)    
+    print("Delete History : 1")
+    print("Go back to Menu : 2")
+    Choice = input("Choose between the 2 choices : ")
+        
+    if Choice == "1":
+        clearhistory()
+        historymenu()
+
+    if Choice == "2":
+        calculatormenu()
+
+
+# Calculator menu
+def calculatormenu(): 
+    print("Make your calculation : 1")
+    print("Show history : 2")
+    Choice = input("Choose between the 2 choices : ")
     
-    result = sortinginput(Calculation)[0] 
+    if Choice == "1":
+        Calculation = input("Enter your calculation : ")
+        Result = calculator(Calculation)
+        if Result == False:
+            Result = "Error"
+        else:
+            Result = Result[0]
+        FullCalculation = f"{Calculation} = {Result}"
+        print(FullCalculation)
+        History.append(FullCalculation)
+        with open("historique.txt", "a", encoding="utf-8") as f:
+            f.write(f"{Calculation} = {Result}\n")
+            calculatormenu()
+                
+    elif Choice == "2":
+        historymenu()
+        
 
-    print(Calculation,'=',sortinginput(Calculation)[0])
     
-    Historique.append(f"{Calculation} = {result}")
 
-    with open("historique.txt", "a", encoding="utf-8") as f:
-        f.write(f"{Calculation} = {result}\n")
 
-callcalculator("(13+3²)*432%(351-√4)")
-print(Historique)
+calculatormenu()
